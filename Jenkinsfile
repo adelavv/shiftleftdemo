@@ -49,29 +49,31 @@ node {
 
     stage('Scan image with twistcli and Publish to Jenkins') {
       try {
-	   // sh 'docker pull adelavv/evilpetclinic:latest'  
+	    sh 'docker pull rbenavente/evilpetclinic:latest'  
             withCredentials([usernamePassword(credentialsId: 'twistlock_creds', passwordVariable: 'TL_PASS', usernameVariable: 'TL_USER')]) {
-           //	prismaCloudScanImage ca: '', cert: '', dockerAddress: 'unix:///var/run/docker.sock', ignoreImageBuildTime: true, image: 'adelavv/evilpetclinic:latest', key: '', logLevel: 'debug', podmanPath: '', project: '', resultsFile: 'prisma-cloud-scan-results.json'
+           	prismaCloudScanImage ca: '', cert: '', dockerAddress: 'unix:///var/run/docker.sock', ignoreImageBuildTime: true, image: 'rbenavente/evilpetclinic:latest', key: '', logLevel: 'debug', podmanPath: '', project: '', resultsFile: 'prisma-cloud-scan-results.json'
 		sh 'curl -k -u $TL_USER:$TL_PASS --output ./twistcli https://$TL_CONSOLE/api/v1/util/twistcli'
                 sh 'sudo chmod a+x ./twistcli'
-                sh "./twistcli images scan --u $TL_USER --p $TL_PASS --address https://$TL_CONSOLE --details solalraveh/evilpetclinic:latest"
+                sh "./twistcli images scan --u $TL_USER --p $TL_PASS --address https://$TL_CONSOLE --details rbenavente/evilpetclinic:latest"
             }
-	// } finally {
-        //    prismaCloudPublish resultsFilePattern: 'prisma-cloud-scan-results.json'
-        } catch (err) {
-            echo err.getMessage()
-            echo "Error detected"
-			throw RuntimeException("Build failed for some specific reason!")
-        }
+	 } finally {
+             prismaCloudPublish resultsFilePattern: 'prisma-cloud-scan-results.json'
+        } 
+//	      catch (err) {
+    //       echo err.getMessage()
+    //        echo "Error detected"
+    //			throw RuntimeException("Build failed for some specific reason!")
+   //     }
     }
   
-//stage('Scan K8s yaml manifest with Bridgecrew/checkov') {
-//  withDockerContainer(image: 'bridgecrew/jenkins_bridgecrew_runner:latest') {              
-//                 sh "/run.sh cadc031b-f0a7-5fe1-9085-e0801fc52131 https://github.com/adelavv/shiftleftdemo"
+stage('Scan K8s yaml manifest with Bridgecrew/checkov') {
+  withDockerContainer(image: 'bridgecrew/jenkins_bridgecrew_runner:latest') {              
+                  sh "/run.sh cadc031b-f0a7-5fe1-9085-e0801fc52131 https://github.com/adelavv/shiftleftdemo"
                
             
- //       }
-//	}
+        }
+        }
+	
 stage("Scan Cloud Formation Template with API v2") {
 
         def response
